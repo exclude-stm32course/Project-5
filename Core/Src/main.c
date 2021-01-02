@@ -433,6 +433,7 @@ void producer_func(void *argument)
 		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
 		/* Put a value into the list. */
 		status = osMessageQueuePut(itemQueueHandle, &msg, 0, timeout);
+		++msg;
 		osMutexRelease(mutex_jobHandle);
 		if(osOK == status) continue;
 
