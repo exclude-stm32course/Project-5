@@ -1,8 +1,9 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.CountingSemaphores01=sem_job,5,Dynamic,NULL
 FREERTOS.FootprintOK=true
-FREERTOS.IPParameters=Tasks01,CountingSemaphores01,FootprintOK,Mutexes01
+FREERTOS.IPParameters=Tasks01,CountingSemaphores01,FootprintOK,Mutexes01,Queues01
 FREERTOS.Mutexes01=mutex_job,Dynamic,NULL
+FREERTOS.Queues01=itemQueue,5,uint16_t,0,Dynamic,NULL,NULL
 FREERTOS.Tasks01=Producer,24,128,producer_func,Default,NULL,Dynamic,NULL,NULL;Consumer,24,128,consumer_func,Default,NULL,Dynamic,NULL,NULL
 File.Version=6
 I2C1.IPParameters=Timing-I2C
@@ -54,7 +55,7 @@ Mcu.PinsNb=31
 Mcu.ThirdPartyNb=0
 Mcu.UserConstants=
 Mcu.UserName=STM32F303VCTx
-MxCube.Version=6.1.0
+MxCube.Version=6.1.1
 MxDb.Version=DB.6.0.10
 NVIC.BusFault_IRQn=true\:0\:0\:false\:false\:true\:false\:true\:false
 NVIC.DebugMonitor_IRQn=true\:0\:0\:false\:false\:true\:false\:true\:false

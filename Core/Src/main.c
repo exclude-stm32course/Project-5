@@ -61,6 +61,11 @@ const osThreadAttr_t Consumer_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 128 * 4
 };
+/* Definitions for itemQueue */
+osMessageQueueId_t itemQueueHandle;
+const osMessageQueueAttr_t itemQueue_attributes = {
+  .name = "itemQueue"
+};
 /* Definitions for mutex_job */
 osMutexId_t mutex_jobHandle;
 const osMutexAttr_t mutex_job_attributes = {
@@ -149,6 +154,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* creation of itemQueue */
+  itemQueueHandle = osMessageQueueNew (5, sizeof(uint16_t), &itemQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -409,9 +418,12 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_producer_func */
 void producer_func(void *argument)
 {
-	/* USER CODE BEGIN 5 */
+  /* USER CODE BEGIN 5 */
 	/* Infinite loop */
 	osStatus_t status;
+
+	uint16_t msg = 0x1;
+	int timeout = 0x0;
 
 	for(;;)
 	{
@@ -420,14 +432,15 @@ void producer_func(void *argument)
 		osMutexAcquire(mutex_jobHandle, 0);
 		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
 		/* Put a value into the list. */
-
+		status = osMessageQueuePut(itemQueueHandle, &msg, 0, timeout);
 		osMutexRelease(mutex_jobHandle);
-		continue;
+		if(osOK == status) continue;
+
 end:
 		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
 		osDelay(1000);
 	}
-	/* USER CODE END 5 */
+  /* USER CODE END 5 */
 }
 
 /* USER CODE BEGIN Header_consumer_func */
@@ -439,25 +452,26 @@ end:
 /* USER CODE END Header_consumer_func */
 void consumer_func(void *argument)
 {
-	/* USER CODE BEGIN consumer_func */
+  /* USER CODE BEGIN consumer_func */
 	/* Infinite loop */
+	uint16_t msg = 0x0;
+	int timeout = 0x0;
 	osStatus_t status;
 	for(;;)
 	{
 		status = osSemaphoreRelease(sem_jobHandle);
 		if(osOK != status) goto end;
 		osMutexAcquire(mutex_jobHandle, 0);
-		/* Get a value into the list. */
 		HAL_GPIO_WritePin(LD3_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
-
+		status = osMessageQueueGet(itemQueueHandle, &msg, 0, timeout);
 		osMutexRelease(mutex_jobHandle);
-		continue;
+		if(osOK == status) continue;
 
 end:
 		HAL_GPIO_WritePin(LD3_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
 		osDelay(1000);
 	}
-	/* USER CODE END consumer_func */
+  /* USER CODE END consumer_func */
 }
 
  /**
